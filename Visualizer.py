@@ -1,4 +1,5 @@
 import neopixel
+import time
 
 
 class Visualizer(object):
@@ -26,20 +27,34 @@ class Visualizer(object):
         self.visualizerArray = []
         self.numberOfLedsPerBar = int(numberOfLeds / numberOfBars)
         self.numberOfBars = numberOfBars
-        self.__initializeArray()
+        self.__initialize_array()
 
-    def __initializeArray(self):
-        verticalBool = int(self.y_flow == 'down') if self.x_flow == 'right' else int(self.y_flow != 'down')
+    def __initialize_array(self, color=[0, 0, 0]):
+        vertical_bool = int(self.y_flow == 'down')
         for x in range(self.numberOfBars):
             bar = []
             for y in range(self.numberOfLedsPerBar):
-                index = (x * 15) + y if x % 2 == 0 else (x + 1) * 15 - (y + 1)
-                led = (index, (0, 0, 0))
+                index = (x * 15) + y \
+                    if x % 2 == vertical_bool \
+                    else (x + 1) * 15 - (y + 1)
+                led = [index, color]
                 bar.append(led)
             self.visualizerArray.append(bar)
         if self.x_flow != 'right':
             self.visualizerArray.reverse()
 
-    def colorLed(self, led, show=True):
+    def color_led(self, led, show=True):
         self.strip.setPixelColor(led[0], neopixel.Color(*(led[1])))
         if show: self.strip.show()
+
+    def color_bar(self, bar):
+        for led in bar:
+            self.color_led(led)
+            time.sleep(0.1)
+
+    def wipe(self, color=[0, 0, 0]):
+        for x in range(self.numberOfBars):
+            for y in range(self.numberOfLedsPerBar):
+                self.visualizerArray[x][y][1] = color
+        for bar in self.visualizerArray:
+            self.color_bar(bar)
